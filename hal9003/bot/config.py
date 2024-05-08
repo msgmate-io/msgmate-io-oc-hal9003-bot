@@ -55,6 +55,7 @@ DJANGO_SERVER_HOST = os.environ.get('DJANGO_SERVER_HOST', '0.0.0.0')
 DJANGO_SERVER_PORT = int(os.environ.get('DJANGO_SERVER_PORT', '3445'))
 
 DJANGO_SERVER_ONLY = os.environ.get('DJANGO_SERVER_ONLY', 'false').lower() in ('true', '1', 't')
+BOT_ONLY = os.environ.get('BOT_ONLY', 'false').lower() in ('true', '1', 't')
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 DEEPINFRA_API_KEY = os.environ.get('DEEPINFRA_API_KEY', '')

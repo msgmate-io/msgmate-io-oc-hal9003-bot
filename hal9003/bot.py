@@ -75,8 +75,9 @@ if __name__ == '__main__':
             exit(0)
     
     # Start the Django server using subprocess and get the process ID
-    server_process = subprocess.Popen(["python3", "server.py"], stdout=sys.stdout, stderr=subprocess.PIPE)
-    server_pid = str(server_process.pid)
+    if not bc.BOT_ONLY:
+        server_process = subprocess.Popen(["python3", "server.py"], stdout=sys.stdout, stderr=subprocess.PIPE)
+        server_pid = str(server_process.pid)
     
     try:
         if bc.INFINITE_RETRY:
