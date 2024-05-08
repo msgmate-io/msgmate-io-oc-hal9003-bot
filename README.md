@@ -1,4 +1,4 @@
-## Hal 9003
+## Hal 9003 ( `hal9003-msgmate-open-chat-bot` )
 
 Open source, open-chat based Python AI bot.
 
