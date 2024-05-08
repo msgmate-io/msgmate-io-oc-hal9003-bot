@@ -6,3 +6,4 @@ watchdog
 py-mon
 django
 djangorestframework
+aiohttp
