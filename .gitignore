@@ -161,3 +161,4 @@ cython_debug/
 
 # a way for me not to accidentally commit my .env file
 env_overwrite
+notes.md
