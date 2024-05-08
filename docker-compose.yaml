@@ -1,0 +1,30 @@
+services:
+  py:
+    build:
+      context: hal9003
+      dockerfile: ./Dockerfile
+    image: "${IMAGE_PREFIX-}bot-python:${IMAGE_TAG-latest}"
+    volumes:
+      - ./hal9003:/bot
+    environment:
+      DEBUG: ${DEBUG:-true}
+      SERVER_HOST: ${SERVER_HOST:-host.docker.internal:8000}
+      SERVER_USE_SSL: ${SERVER_USE_SSL:-false}
+      BOT_USERNAME: ${BOT_USERNAME:-bot}
+      BOT_PASSWORD: ${BOT_PASSWORD:-password}
+      WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8000}
+      REDIS_URL: ${REDIS_URL:-redis://host.docker.internal:6380/0}
+      DEBUG_CHAT_IDENTIFIER: ${DEBUG_CHAT_IDENTIFIER:-:}
+      AI_CONNECT_STRING: ${AI_CONNECT_STRING:-@@ai@}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+    ports:
+      - "3334:3334"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
