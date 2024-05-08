@@ -1,0 +1,45 @@
+task:
+  prompt: |
+    List 3 famous scientific breakthroughs in the past century.
+  schema_description: |
+    {
+        "breakthroughs": [
+            {
+                "name": "<name>",
+                "year": "<year>",
+                "country": "<country>",
+                "scientists": [{
+                    "name": "<name>",
+                    "contribution": "<contribution>"
+                }]
+            }
+        ]
+    }
+  schema:
+    type: object
+    properties:
+      breakthroughs:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the breakthrough
+            year:
+              type: integer
+              description: The year of the breakthrough
+            country:
+              type: string
+              description: The country of the breakthrough
+            scientists:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the scientist
+                  contribution:
+                    type: string
+                    description: The contribution of the scientist
