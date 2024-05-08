@@ -1,0 +1,54 @@
+base_prompt: |
+  You are a function parameter extracting AI.
+  The User Intend AI has already identified the user intend as "{tool_name}".
+  The "{tool_name}" function has the following input schema:
+
+  {schema}
+  
+  Respond with the JSON object containing the extracted parameters only.
+  Provide your answer in the following JSON format: 
+
+  {schema_example}
+  
+  and respond with the JSON object only.
+tools:
+  - id: search_web
+    name: search_web
+    schema:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The search query
+    schema_example: |
+      {
+        "query": "the users search query"
+      }
+  - id: knowledge
+    name: knowledge
+    schema:
+      type: object
+      schema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: The complete users question ( don't obmit any part of the query )
+    schema_example: |
+      {
+        "query": "The complete users question ( don't obmit any part of the query )"
+      }
+  - id: casual
+    name: casual
+    schema:
+      type: object
+      schema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: The complete users question ( don't obmit any part of the query )
+    schema_example: |
+      {
+        "query": "The complete users question ( don't obmit any part of the query )"
+      }
