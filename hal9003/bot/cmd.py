@@ -53,7 +53,7 @@ class CommandProcessor:
             if args.set:
                 await self.mng.sendChatMessage(mc, f"Setting AI backend to: `{args.set}`")
             else:
-                await self.mng.sendChatMessage(mc, f"Current AI backend: `{bc.GLOBAL_AI_BACKENDS[0][0]}`")
+                await self.mng.sendChatMessage(mc, f"Current AI backend: `{bc.MODEL_BACKEND}`")
         
         parser = argparse.ArgumentParser(prog='AI Backend command')
         parser.add_argument('--set', type=str, default=None)
