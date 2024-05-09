@@ -14,6 +14,7 @@ from bot.db import DB
 from bot.cmd import CommandProcessor
 from bot import config as bc
 from bot.fmt import Formatter
+from agent.models import Backends, BACKENDS
 from datetime import datetime
 
 GLOBAL_REDIS_URL = bc.REDIS_URL
@@ -29,7 +30,6 @@ class Hal9003(WebSocketClientProtocol):
     db: DB = None
     mng: Manager = None
     ai_client: AsyncOpenAI = None
-    ai_config = None
 
     def __init__(self):
         super().__init__()
@@ -37,10 +37,8 @@ class Hal9003(WebSocketClientProtocol):
 
         self.mng = Manager(self, db=self.db)
         self.cmd = CommandProcessor(self)
-        ai_backend = bc.GLOBAL_AI_BACKENDS[0][2]
-        ai_api_key = bc.GLOBAL_AI_BACKENDS[0][1]
-        self.ai_config = bc.GLOBAL_AI_BACKENDS[0]
-        self.ai_client = AsyncOpenAI(api_key=ai_api_key, base_url=ai_backend if (ai_backend and ai_backend != '') else None)
+        model_backend = BACKENDS[bc.MODEL_BACKEND]
+        self.ai_client = AsyncOpenAI(api_key=model_backend.api_key, base_url=model_backend.base_url)
         self.queue = asyncio.Queue()
 
     async def processCommandMessage(self, context: MessageContext):
@@ -62,6 +60,11 @@ class Hal9003(WebSocketClientProtocol):
         else:
             pretty_chat_json = await self.fmt.wrap_code(json.dumps(db_chat.to_dict(), indent=4))
             await self.mng.debugSend(f"Chat found in db\n - {context.chat.uuid}\n{pretty_chat_json}", context, verbose=3)
+            
+        # If it's debug chat - complain
+        chat_settings, config = await self.db.getOrCreateChatSettings(context.chat.uuid)
+        if chat_settings.title == bc.GLOBAL_DEBUG_CHAT_TITLE:
+            await self.mng.debugSend("DON'T TALK TO ME IN DEBUG CHAT", context)
         await self.aiChatResponse(context)
         
     async def aiChatResponse(self, context: MessageContext):
@@ -83,7 +86,7 @@ class Hal9003(WebSocketClientProtocol):
         ]
         
         pretty_messages_json = await self.fmt.wrap_code(json.dumps(messages, indent=4))
-        await self.mng.debugSend(f"## AI Response triggered\n> {context.message.text}\n - in chat `{context.chat.uuid}`\n - by sender `{context.senderId}`\n{pretty_messages_json}", context, verbose=2)
+        await self.mng.debugSend(f"## AI Response triggered\n> {context.message.text}\n - in chat `{context.chat.uuid}`\n - by sender `{context.senderId}`\n- with model `{config.model}`\n{pretty_messages_json}", context, verbose=2)
 
         response = await self.ai_client.chat.completions.create(
             model=config.model,
