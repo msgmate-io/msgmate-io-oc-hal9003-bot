@@ -7,6 +7,7 @@ from open_chat_api_client.models import ChatResult, ChatSettings, SetChatTitleRe
 import json
 from typing import Optional
 from bot import config as bc
+from agent.models import get_model
 import redis
 
 class RedisEmulatedClient:
@@ -98,7 +99,7 @@ class DB:
                 # initalize with default settings
                 settings = await chats_settings_create.asyncio(chat_uuid=chat_uuid, body=SetChatTitleRequest(
                     config=ChatConfig(
-                        model=self.bot.ai_config[3],
+                        model=bc.DEFAULT_MODEL,
                     ).to_dict()
                 ), client=self.client)
                 pretty_settings_json = await self.fmt.pretty_json(settings.to_dict())
