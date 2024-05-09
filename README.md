@@ -4,29 +4,39 @@ Open source, open-chat based Python AI bot.
 
 ## TL;DR
 
+Starts all services with all features and auto-reload.
+
 ```bash
 docker-compose up --build
 ```
 
-### Running the bot locally
+### Using the bot with OpenAI-API
 
-First setup your env in `.env`.
-e.g.:
-
-```
-SERVER_HOST="localhost:8000"
-SERVER_USE_SSL="false"
-BOT_USERNAME="testBot1"
-BOT_PASSWORD="Test123!"
-WEBSOCKET_PORT="8000"
-REDIS_URL="redis://host.docker.internal:6379/0"
-DEBUG_CHAT_IDENTIFIER="<user-uuid>:<chat-uuid>"
-AI_CONNECT_STRING=""
-```
+First setup your env in `.env`, add the following to your default setup:
+e.g. use the following setup with your own `OPENAI_API_KEY`, to use the bot in development:
 
 ```bash
-env $(cat .env | xargs) python3 -u bot.py
-env $(cat .env | xargs) python3 -u api.py
+MODEL_BACKEND="openai"
+DEFAULT_MODEL="gpt-3.5-turbo"
+OPENAI_API_KEY="sk-***"
+```
+
+### Or use the bot using deepinfa
+
+```bash
+MODEL_BACKEND="deepinfra"
+DEFAULT_MODEL="meta-llama/Meta-Llama-3-70B-Instruct"
+DEEPINFRA_API_KEY="****"
+```
+
+### Running the bot outside of Docker
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r ./hal9003/requirements.txt
+env $(cat .env | xargs) python3 -u hal9003/bot.py # start the bot
+env $(cat .env | xargs) python3 -u hal9003/server.py # start the companion server
 ```
 
 ### About
