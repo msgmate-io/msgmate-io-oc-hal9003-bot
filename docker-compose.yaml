@@ -3,7 +3,7 @@ services:
     build:
       context: hal9003
       dockerfile: ./Dockerfile
-    image: "${IMAGE_PREFIX-}bot-python:${IMAGE_TAG-latest}"
+    image: "${IMAGE_PREFIX-}hal9003-bot:${IMAGE_TAG-latest}"
     volumes:
       - ./hal9003:/bot
     environment:
