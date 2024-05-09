@@ -2,7 +2,7 @@ from typing import Optional
 import json
 from dataclasses import dataclass
 from open_chat_api_client.models import Message, ChatResult
-from bot.config import GLOBAL_DEBUG_CHAT_UUID, GLOBAL_DEBUG_RECIPIENT_UUID
+from bot.config import GLOBAL_DEBUG_CHAT_TITLE
 
 @dataclass
 class MessageContext:
@@ -49,9 +49,8 @@ class Manager:
         if messageContext:
             debug_label = f"DEBUG: Chat: {messageContext.chat.uuid}, Sender: {messageContext.senderId}\n"
         debug_label = await self.bot.fmt.wrap_code(debug_label)
-        self.syncSendCustomMessage('send_message', {
-            'chat_id': GLOBAL_DEBUG_CHAT_UUID,
-            'recipient_id': GLOBAL_DEBUG_RECIPIENT_UUID,
+        self.syncSendCustomMessage('send_message_chat_title', {
+            'chat_title': GLOBAL_DEBUG_CHAT_TITLE,
             'text': debug_label + "\n" + text
         })
         
