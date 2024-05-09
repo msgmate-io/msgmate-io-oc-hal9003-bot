@@ -15,9 +15,13 @@ services:
       BOT_ONLY: ${BOT_ONLY:-true}
       WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8000}
       REDIS_URL: ${REDIS_URL:-redis://host.docker.internal:6380/0}
-      DEBUG_CHAT_IDENTIFIER: ${DEBUG_CHAT_IDENTIFIER:-:}
       AI_CONNECT_STRING: ${AI_CONNECT_STRING:-@@ai@}
       INFINITE_RETRY: ${INFINITE_RETRY:-true}
+      DEBUG_CHAT_TITLE: ${DEBUG_CHAT_TITLE:-hal9003-debug}
+      DEEPINFRA_API_KEY: ${DEEPINFRA_API_KEY:-}
+      MODEL_BACKEND: ${MODEL_BACKEND:-openai}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-gpt-3.5-turbo}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
