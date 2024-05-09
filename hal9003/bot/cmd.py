@@ -13,35 +13,49 @@ class CommandProcessor:
     mng: Manager = None
     db: DB = None
 
-    def __init__(self, bot):
-        self.mng = Manager(bot)
-        self.db = self.mng.db
+    def __init__(self, bot, db):
+        self.mng = Manager(bot, db=db)
+        self.db = db
         
     async def command_chat(self, mc: MessageContext):
         """
         View edit and manage the current chat object and its settings 
         """
         parser = argparse.ArgumentParser(prog='Hal9003 `chat` command')
-        parser.add_argument('subcommand', type=str, nargs="?", choices=['settings', None], default=None)
-        parser.add_argument('--set', type=str, default=None, nargs="+")
+        parser.add_argument('--key', type=str, default=None)
+        parser.add_argument('--set', type=str, default=None)
         
 
         async def _run_command(args):
             await self.mng.debugSend(f"Running chat command with subcommand: {args}", mc)
-            if not args.subcommand:
-                await self.mng.sendChatMessage(mc, "No `[subcommand]` provided \n" + parser.format_help())
-                return
             
-            if args.subcommand == 'settings' and (not args.set):
+            if (not args.key) and (not args.set):
                 chat_settings, _ = await self.db.getOrCreateChatSettings(mc.chat.uuid, mc=mc)
                 pretty_settings_json = await self.fmd.wrap_code(json.dumps(chat_settings.to_dict(), indent=4))
                 await self.mng.sendChatMessage(mc, f"Chat settings for `{mc.chat.uuid}`\n{pretty_settings_json}")
-            elif args.subcommand == 'settings' and args.set:
-                set_cmd = " ".join(args.set)
-                key, value = set_cmd.split('@')
-                updated_settings, _ = await self.db.updateChatSettingsConfigKey(mc.chat.uuid, key, value, mc=mc)
-                pretty_settings_json = await self.fmd.wrap_code(json.dumps(updated_settings.to_dict(), indent=4))
-                await self.mng.sendChatMessage(mc, f"Updated chat settings for `{mc.chat.uuid}`\n{pretty_settings_json}")
+            elif args.key and (not args.set):
+                chat_settings, _ = await self.db.getOrCreateChatSettings(mc.chat.uuid, mc=mc)
+                cs = chat_settings.to_dict()
+                keys = args.key.split('.')
+                dictionary = cs
+                try:
+                    for key in keys:
+                        dictionary = dictionary[key]
+                    await self.mng.sendChatMessage(mc, f"Chat setting `{args.key}`: `{dictionary}`")
+                except KeyError:
+                    await self.mng.sendChatMessage(mc, f"Chat setting `{args.key}` not found")
+            elif args.key and args.set:
+                chat_settings, _ = await self.db.getOrCreateChatSettings(mc.chat.uuid, mc=mc)
+                cs = chat_settings.to_dict()
+                keys = args.key.split('.')
+                dictionary = cs
+                try:
+                    assert len(keys) == 2 and (keys[0] == 'config'), "Only setting 'config' allowed"
+                    cs, config = await self.db.updateChatSettingsConfigKey(mc.chat.uuid, keys[-1], args.set, mc=mc)
+                    pretty_settings_json = await self.fmd.wrap_code(json.dumps(cs.to_dict(), indent=4))
+                    await self.mng.sendChatMessage(mc, f"Chat setting `{args.key}` set to: `{args.set}`\n{pretty_settings_json}")
+                except KeyError:
+                    await self.mng.sendChatMessage(mc, f"Chat setting `{args.key}` not found")
         
         return parser, _run_command
     
