@@ -22,9 +22,7 @@ WEBSOCKET_PORT = os.environ.get('WEBSOCKET_PORT', 80 if SERVER_USE_SSL else 443)
 
 DEBUG_CHAT_IDENTIFIER = os.environ.get('DEBUG_CHAT_IDENTIFIER', ':')
 GLOBAL_DEBUG_CHAT_UUID, GLOBAL_DEBUG_RECIPIENT_UUID = DEBUG_CHAT_IDENTIFIER.split(':')
-
-# [name, api_key, host, default_model]
-GLOBAL_AI_BACKENDS = [backend.split("@") for backend in os.environ.get("AI_CONNECT_STRING", "@@").split(",")]
+GLOBAL_DEBUG_CHAT_TITLE = os.environ.get('DEBUG_CHAT_TITLE', 'Debug Chat')
 
 print("DEBUG_CHAT_IDENTIFIER:", DEBUG_CHAT_IDENTIFIER)
 
@@ -57,6 +55,9 @@ DJANGO_SERVER_PORT = int(os.environ.get('DJANGO_SERVER_PORT', '3445'))
 DJANGO_SERVER_ONLY = os.environ.get('DJANGO_SERVER_ONLY', 'false').lower() in ('true', '1', 't')
 BOT_ONLY = os.environ.get('BOT_ONLY', 'false').lower() in ('true', '1', 't')
 
+
+DEFAULT_MODEL = os.environ.get('DEFAULT_MODEL', 'gpt-3.5-turbo')
+MODEL_BACKEND = os.environ.get('MODEL_BACKEND', 'openai')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 DEEPINFRA_API_KEY = os.environ.get('DEEPINFRA_API_KEY', '')
     
