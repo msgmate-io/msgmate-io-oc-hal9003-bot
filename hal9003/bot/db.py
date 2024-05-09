@@ -8,7 +8,7 @@ import json
 from typing import Optional
 from bot import config as bc
 from agent.models import get_model
-import redis
+import redis.asyncio as redis
 
 class RedisEmulatedClient:
 
@@ -49,19 +49,21 @@ class DB:
         self.client = client
         self.db_client = None
         self.bot = bot
-        self.mng = Manager(bot)
+        self.mng = Manager(bot, db=self)
         
     async def flush(self):
         db = await self.get_or_create_client()
         await db.flushdb()
         
     async def get_or_create_client(self, emulated_client=(not bc.USE_REDIS)):
-        if emulated_client and (not isinstance(self.db_client, RedisEmulatedClient)):
-            self.db_client = RedisEmulatedClient()
-            return self.db_client
         if self.db_client is None:
-            pool = redis.ConnectionPool.from_url(self.url + "?decode_responses=true")
-            self.db_client = redis.Redis.from_pool(pool)
+            if emulated_client:
+                self.db_client = RedisEmulatedClient()
+            else:
+                redis_url = self.url + "?decode_responses=true"
+                pool = redis.ConnectionPool.from_url(redis_url)
+                self.db_client = redis.Redis.from_pool(pool)
+            
         return self.db_client
     
     async def validateConfigOrReset(
@@ -76,24 +78,35 @@ class DB:
             await self.mng.debugSend(f"## Chat settings found in db, failed to parse config\n - in chat {chat_uuid}\n> {ex}\n - **resetting config to defaults**", None, verbose=1)
             if mc:
                 await self.mng.sendChatMessage(mc, f"Failed to parse chat settings config, resetting to defaults")
-            config = ChatConfig(model=self.bot.ai_config[3])
+            config = ChatConfig(model=bc.DEFAULT_MODEL)
             settings = await self.updateChatSettings(chat_uuid, ChatSettings(
                 config=config.to_dict()
             ))
         return settings, config
+    
+    async def shouldDebug(self):
+        db = await self.get_or_create_client()
+        debug = await db.get("debug")
+        return (debug == "true") or bc.DEBUG
+    
+    async def setDebug(self, debug):
+        db = await self.get_or_create_client()
+        await db.set("debug", "true" if debug else "false")
 
-    async def getOrCreateChatSettings(self, chat_uuid, mc: Optional[MessageContext] = None) -> tuple[ChatSettings, ChatConfig]:
+    async def getOrCreateChatSettings(self, chat_uuid, mc: Optional[MessageContext] = None, debug=False) -> tuple[ChatSettings, ChatConfig]:
         db = await self.get_or_create_client()
         settings = await db.get(f"chat:{chat_uuid}:settings")
         if not settings:
-            await self.mng.debugSend(f"## Chat settings not found in db, fetching from server\n - in chat {chat_uuid}", None, verbose=2)
+            # await self.mng.debugSend(f"## Chat settings not found in db, fetching from server\n - in chat {chat_uuid}", None, verbose=2)
             # try to fetch current chat settings
             try:
                 req = await chats_settings_retrieve.asyncio_detailed(chat_uuid=chat_uuid, client=self.client)
-                await self.mng.debugSend(f"## Chat settings fetched from server\n - in chat {chat_uuid}\n{req.parsed}", None, verbose=2)
+                if debug:
+                    await self.mng.debugSend(f"## Chat settings fetched from server\n - in chat {chat_uuid}\n{req.parsed}", None, verbose=2)
                 settings = req.parsed
             except Exception as ex:
-                await self.mng.debugSend(f"## Chat settings not found in db, failed to fetch from server\n - in chat {chat_uuid}\n> {ex}", None, verbose=1)
+                if debug:
+                    await self.mng.debugSend(f"## Chat settings not found in db, failed to fetch from server\n - in chat {chat_uuid}\n> {ex}", None, verbose=1)
                 settings = None
             if not settings:
                 # initalize with default settings
@@ -103,12 +116,14 @@ class DB:
                     ).to_dict()
                 ), client=self.client)
                 pretty_settings_json = await self.fmt.pretty_json(settings.to_dict())
-                await self.mng.debugSend(f"## Chat settings not found in db, created\n - in chat {chat_uuid}\n{pretty_settings_json}", None, verbose=2)
+                if debug:
+                    await self.mng.debugSend(f"## Chat settings not found in db, created\n - in chat {chat_uuid}\n{pretty_settings_json}", None, verbose=2)
             await db.set(f"chat:{chat_uuid}:settings", json.dumps(settings.to_dict()))
         else:
             settings = ChatSettings.from_dict(json.loads(settings))
             pretty_settings_json = await self.fmt.pretty_json(settings.to_dict())
-            await self.mng.debugSend(f"## Chat settings found in db\n - in chat {chat_uuid}\n{pretty_settings_json}", None, verbose=3)
+            if debug:
+                await self.mng.debugSend(f"## Chat settings found in db\n - in chat {chat_uuid}\n{pretty_settings_json}", None, verbose=3)
             
         settings, config = await self.validateConfigOrReset(chat_uuid, settings, mc=mc)
         return settings, config
