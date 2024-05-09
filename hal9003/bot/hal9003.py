@@ -36,7 +36,7 @@ class Hal9003(WebSocketClientProtocol):
         self.db = DB(self, redis_url=GLOBAL_REDIS_URL, client=GLOBAL_API_CLIENT)
 
         self.mng = Manager(self, db=self.db)
-        self.cmd = CommandProcessor(self)
+        self.cmd = CommandProcessor(self, db=self.db)
         model_backend = BACKENDS[bc.MODEL_BACKEND]
         self.ai_client = AsyncOpenAI(api_key=model_backend.api_key, base_url=model_backend.base_url)
         self.queue = asyncio.Queue()
@@ -61,10 +61,6 @@ class Hal9003(WebSocketClientProtocol):
             pretty_chat_json = await self.fmt.wrap_code(json.dumps(db_chat.to_dict(), indent=4))
             await self.mng.debugSend(f"Chat found in db\n - {context.chat.uuid}\n{pretty_chat_json}", context, verbose=3)
             
-        # If it's debug chat - complain
-        chat_settings, config = await self.db.getOrCreateChatSettings(context.chat.uuid)
-        if chat_settings.title == bc.GLOBAL_DEBUG_CHAT_TITLE:
-            await self.mng.debugSend("DON'T TALK TO ME IN DEBUG CHAT", context)
         await self.aiChatResponse(context)
         
     async def aiChatResponse(self, context: MessageContext):
@@ -122,6 +118,21 @@ class Hal9003(WebSocketClientProtocol):
     async def _newMessage(self, context: MessageContext):
         pretty_message_json = await self.fmt.wrap_code(json.dumps(context.message.to_dict(), indent=4))
         debug_message = f"## Message\n> {context.message.text}\n- from `{context.senderId}`\n- in chat `{context.chat.uuid}`\n" + pretty_message_json
+        
+        # If it's debug chat - complain
+        chat_settings, config = await self.db.getOrCreateChatSettings(context.chat.uuid)
+        if chat_settings.title == bc.GLOBAL_DEBUG_CHAT_TITLE:
+            if context.message.text == "DEBUG":
+                current_debug = await self.db.shouldDebug()
+                if current_debug:
+                    await self.mng.debugSend(f"Debug mode toggled to {not current_debug}", context)
+                await self.db.setDebug(not current_debug)
+                if not current_debug:
+                    await self.mng.debugSend(f"Debug mode toggled to {not current_debug}", context)
+            else:
+                await self.mng.debugSend("DON'T TALK TO ME IN DEBUG CHAT", context)
+            return
+
         await self.mng.debugSend(debug_message, context)
         # check if the message is a 'command'
         if context.message.text.startswith(tuple(COMMAND_PREFIXES)):

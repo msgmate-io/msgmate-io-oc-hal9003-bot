@@ -49,10 +49,12 @@ class Manager:
         if messageContext:
             debug_label = f"DEBUG: Chat: {messageContext.chat.uuid}, Sender: {messageContext.senderId}\n"
         debug_label = await self.bot.fmt.wrap_code(debug_label)
-        self.syncSendCustomMessage('send_message_chat_title', {
-            'chat_title': GLOBAL_DEBUG_CHAT_TITLE,
-            'text': debug_label + "\n" + text
-        })
+        debug = await self.db.shouldDebug()
+        if debug:
+            self.syncSendCustomMessage('send_message_chat_title', {
+                'chat_title': GLOBAL_DEBUG_CHAT_TITLE,
+                'text': debug_label + "\n" + text
+            })
         
     async def sendPartialMessage(self, context: MessageContext, text):
         return await self.sendCustomMessage('partial_message', {
