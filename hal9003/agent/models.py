@@ -3,8 +3,8 @@ from bot import config as bc
 
 @dataclass
 class Backends:
-    OPENAI = "OPENAI"
-    DEEPINFRA = "DEEPINFRA"
+    OPENAI = "openai"
+    DEEPINFRA = "deepinfra"
 
 @dataclass
 class BackendConfig:
