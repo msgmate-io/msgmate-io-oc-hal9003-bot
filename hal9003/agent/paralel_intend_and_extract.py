@@ -1,15 +1,23 @@
-from .complete_json import BaseTaskDescription
-from .paralel_json_complete import json_complete_paralel
+from agent.complete_json import BaseTaskDescription
+from agent.paralel_json_complete import json_complete_paralel
 import json
 import yaml
+import pathlib
+
+
+cur_path = pathlib.Path(__file__).parent.resolve()
+print("Current path:", cur_path)
+
 
 def get_intend_task(
     prompt: str,
     model: str,
     task_id: str
 ) -> BaseTaskDescription:
-    with open("prompts/user_intend_v0.3.yaml") as f:
+
+    with open(f"{cur_path}/prompts/user_intend_v0.3.yaml") as f:
         data = yaml.safe_load(f)
+    
     return BaseTaskDescription(**{
         **data,
         'model': model,
@@ -22,7 +30,7 @@ def get_tools(
     model: str,
     task_id: str
 ) -> list[BaseTaskDescription]:
-    with open("prompts/tools_v0.2.yaml") as f:
+    with open(f"{cur_path}/prompts/tools_v0.2.yaml") as f:
         data = yaml.safe_load(f)
         
     tool_tasks = []
@@ -85,4 +93,6 @@ def intend_extract_paralel_json(
             extraction_for_tool = tool_winner
             break
     print("Extraction for tool:", extraction_for_tool)
+    out["tool_pick"] = most_picked_tool
+    out["extraction_pick"] = extraction_for_tool
     return out
