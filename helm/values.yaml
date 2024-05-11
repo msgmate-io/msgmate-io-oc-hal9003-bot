@@ -1,0 +1,32 @@
+namespace: default
+registry:
+  use: true
+  registrySecrets:
+    - host: host
+      secretName: hal9003-bot-registry-secret
+      token: ""
+bots:
+  - name: Hal9003-1
+    imageURL: "replace"
+    registry:
+      authRequired: true
+      secretName: hal9003-bot-registry-secret
+    redis:
+      svcName: hal9003-redis-1
+      enabled: true
+      port: 6380
+    env:
+      DEBUG: "false"
+      SERVER_HOST: "beta.msgmate.io"
+      SERVER_USE_SSL: "true"
+      BOT_USERNAME: "hal9003-1"
+      BOT_PASSWORD: "Test123!"
+      WEBSOCKET_PORT: "433"
+      USE_REDIS: "true"
+      REDIS_URL: "redis://hal9003-redis-1.default.svc.cluster.local:6380/0"
+      DEBUG_CHAT_TITLE: "hal9003-debug"
+      DEEPINFRA_API_KEY: ""
+      MODEL_BACKEND: "openai"
+      DEFAULT_MODEL: "gpt-3.5-turbo"
+      OPENAI_API_KEY: ""
+      INFINITE_RETRY: "true"

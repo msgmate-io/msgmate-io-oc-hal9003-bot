@@ -39,6 +39,12 @@ env $(cat .env | xargs) python3 -u hal9003/bot.py # start the bot
 env $(cat .env | xargs) python3 -u hal9003/server.py # start the companion server
 ```
 
+### Running Agent / Tests / Evaluations
+
+```bash
+env $(cat .env | xargs) python3 -u hal9003/agent.py
+```
+
 ### About
 
 Build by [@tbscode](https://github.com/tbscode) to work with open-chat.

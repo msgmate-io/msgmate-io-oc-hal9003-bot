@@ -1,0 +1,80 @@
+{{- range .Values.bots }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ .name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: {{ .imageURL }}
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: {{ .name }}-env
+          {{- if .registry.authRequired }}
+          imagePullSecrets:
+            - name: {{ .registry.secretName }}
+          {{- end }}
+{{- if .redis.use }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .redis.svcName }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ .redis.svcName }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .redis.port }}
+      targetPort: {{ .redis.port }}
+  selector:
+    app: {{ .redis.svcName }}
+--
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .redis.svcName }}-app
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .redis.svcName }}-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .redis.svcName }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .redis.svcName }}-app
+    spec:
+      containers:
+        - name: {{ .redis.svcName }}-app
+          image: redis:5
+          ports:
+            - containerPort: {{ .redis.port }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}-env
+  namespace: {{ $.Values.namespace }}
+type: Opaque
+data:
+{{- range $key, $value := .env }}
+  {{ $key }}: {{ $value | b64enc }}
+{{- end }}
+{{- end }}
