@@ -1,6 +1,7 @@
 from autobahn.asyncio.websocket import WebSocketClientProtocol
 from aiohttp.web_runner import GracefulExit
 import traceback
+import shlex
 from aiohttp import web
 from open_chat_api_client.models import Message, ChatResult
 from openai import AsyncOpenAI
@@ -14,7 +15,7 @@ from bot.db import DB
 from bot.cmd import CommandProcessor
 from bot import config as bc
 from bot.fmt import Formatter
-from agent.models import Backends, BACKENDS
+from agent import models
 from datetime import datetime
 
 GLOBAL_REDIS_URL = bc.REDIS_URL
@@ -37,7 +38,7 @@ class Hal9003(WebSocketClientProtocol):
 
         self.mng = Manager(self, db=self.db)
         self.cmd = CommandProcessor(self, db=self.db)
-        model_backend = BACKENDS[bc.MODEL_BACKEND]
+        model_backend = models.BACKENDS[bc.MODEL_BACKEND]
         self.ai_client = AsyncOpenAI(api_key=model_backend.api_key, base_url=model_backend.base_url)
         self.queue = asyncio.Queue()
 
@@ -45,7 +46,7 @@ class Hal9003(WebSocketClientProtocol):
         text = context.message.text
         assert text.startswith(tuple(COMMAND_PREFIXES))
         command = text.split()[0][1:]
-        args = text.split()[1:]
+        args = shlex.split(text[len(command)+1:])
         await self.cmd.run_command(command, args, context)
         
     async def processMessage(self, context: MessageContext):

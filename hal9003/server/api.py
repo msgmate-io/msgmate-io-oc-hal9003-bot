@@ -12,7 +12,8 @@ auth_client = None
 @permission_classes([])
 @authentication_classes([])
 def index(request):
-    return Response({"message": "Hello, I'm Online!"})
+    ip = get_client_ip(request)
+    return Response({"message": "Hello, I'm Online! Hello there! Your IP is: " + ip, "status": "ok"})
 
 class RelaySerializer(serializers.Serializer):
     message = serializers.CharField(required=True)

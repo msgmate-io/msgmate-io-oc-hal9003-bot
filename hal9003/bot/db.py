@@ -7,7 +7,6 @@ from open_chat_api_client.models import ChatResult, ChatSettings, SetChatTitleRe
 import json
 from typing import Optional
 from bot import config as bc
-from agent.models import get_model
 import redis.asyncio as redis
 
 class RedisEmulatedClient:

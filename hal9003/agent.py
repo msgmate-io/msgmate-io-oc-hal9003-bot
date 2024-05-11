@@ -1,0 +1,2 @@
+from agent.tests import test_json
+test_json.tests_single_models_intend_response()

@@ -5,4 +5,6 @@
 pymon bot.py -c
 
 # start the server process
-python3 -u server.py
+if [ "$SEPERATE_SERVER" = "true" ]; then
+    python3 -u server.py
+fi

@@ -7,3 +7,7 @@ py-mon
 django
 djangorestframework
 aiohttp
+requests
+jsonschema
+tabulate
+pyyaml

@@ -59,20 +59,6 @@ class CommandProcessor:
         
         return parser, _run_command
     
-    async def command_ai_backend(self, mc: MessageContext):
-        """
-        Set or view the current AI backend for the whole bot
-        """
-        async def _run_command(args):
-            if args.set:
-                await self.mng.sendChatMessage(mc, f"Setting AI backend to: `{args.set}`")
-            else:
-                await self.mng.sendChatMessage(mc, f"Current AI backend: `{bc.MODEL_BACKEND}`")
-        
-        parser = argparse.ArgumentParser(prog='AI Backend command')
-        parser.add_argument('--set', type=str, default=None)
-        return parser, _run_command
-    
     async def command_flush(self, mc: MessageContext):
         """
         Flushes the db
@@ -95,6 +81,32 @@ class CommandProcessor:
 
         parser = argparse.ArgumentParser(prog='Ping Command')
         parser.add_argument('--loop', type=int, default=1)
+        
+        return parser, _run_command
+
+    async def command_intend(self, mc: MessageContext):
+        """
+        Intend 
+        """
+        
+        async def _run_command(args):
+            intend_model = "meta-llama/Meta-Llama-3-70B-Instruct"
+            await self.mng.sendPartialMessage(mc, f"Checking Intend ...")
+            await self.mng.debugSend(f"Running intend command with subcommand: {args}", mc)
+            from agent.paralel_intend_and_extract import intend_extract_paralel_json
+            res = intend_extract_paralel_json(
+                prompt=args.query,
+                models=[intend_model],
+                batch_size=2
+            )
+            await self.mng.debugSend(f"Intend results: {res}", mc)
+            tool_pick = res["tool_pick"]
+            extraction_pick = res["extraction_pick"]
+            pretty_res = await self.fmd.wrap_code(json.dumps(extraction_pick['parsed'], indent=4))
+            await self.mng.sendChatMessage(mc, f"Intend check resulted in:\n - Tool pick: `{tool_pick}`\n - Extraction pick: \n{pretty_res}")
+
+        parser = argparse.ArgumentParser(prog='Intend checker')
+        parser.add_argument('--query', type=str, default="What is the meaning of life?")
         
         return parser, _run_command
     
