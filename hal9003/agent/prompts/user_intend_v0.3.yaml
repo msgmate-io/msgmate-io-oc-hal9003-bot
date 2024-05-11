@@ -1,6 +1,6 @@
 refinement_schema_prompt: |
   You are a Intend Analysing AI. 
-  Based on the user you have to categores the users intend, into one of the following categories:
+  Based on the users messages you have to categorize the users intend, into one of the following categories:
 
   [
     {

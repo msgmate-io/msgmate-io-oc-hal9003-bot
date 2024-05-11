@@ -1,6 +1,20 @@
 import openai
-from .models import get_model
-from .utils import debug_log, create_client
+from agent import models
+
+
+def debug_log(message, model=None):
+    prefix = f"[{model}] " if model else ">"
+    print(f"{prefix} {message}")
+
+def create_client(
+    backend: models.BackendConfig
+):
+    client = openai.OpenAI(
+        api_key=backend.api_key,
+        base_url=backend.base_url
+    )
+    return client
+
 import json
 from jsonschema import validate
 from enum import Enum
@@ -70,7 +84,7 @@ def complete_json(
     """
     
     debug_log("SELECTED MODEL:",task.model)
-    model = get_model(task.model)
+    model = models.get_model(task.model)
     client = create_client(model.client_config)
     
     assert task.schema_description or task.refinement_schema_prompt, "Either schema_description or refinement_schema_prompt must be provided."

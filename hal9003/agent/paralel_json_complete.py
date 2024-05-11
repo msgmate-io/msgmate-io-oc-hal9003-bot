@@ -1,6 +1,6 @@
 import time
 import concurrent.futures
-from .complete_json import BaseTaskDescription, complete_json
+from agent.complete_json import BaseTaskDescription, complete_json
 from tabulate import tabulate
 
 def timed(func):

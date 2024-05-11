@@ -48,7 +48,13 @@ tools:
           query:
             type: string
             description: The complete users question ( don't obmit any part of the query )
+            required: true
+          response:
+            type: string
+            description: Your response to the users question
+            required: true
     schema_example: |
       {
-        "query": "The complete users question ( don't obmit any part of the query )"
+        "query": "The complete users question ( don't obmit any part of the query )",
+        "response": "Your response to the users question"
       }
