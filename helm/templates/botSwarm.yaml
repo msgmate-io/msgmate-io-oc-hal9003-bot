@@ -23,10 +23,10 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .name }}-env
-          {{- if .registry.authRequired }}
-          imagePullSecrets:
-            - name: {{ .registry.secretName }}
-          {{- end }}
+      {{- if .registry.authRequired }}
+      imagePullSecrets:
+        - name: {{ .registry.secretName }}
+      {{- end }}
 ---
 {{- if .ingress.use }}
 apiVersion: networking.k8s.io/v1
