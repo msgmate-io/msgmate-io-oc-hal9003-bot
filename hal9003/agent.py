@@ -1,2 +1,3 @@
-from agent.tests import test_json
-test_json.tests_single_models_intend_response()
+from agent.tims_RAGged_System import cmd_run
+
+cmd_run()

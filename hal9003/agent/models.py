@@ -75,6 +75,13 @@ MODELS = [
         supports_tools=True,
         supports_functions=True,
         client_config=BACKENDS[Backends.OPENAI]
+    ),
+    ModelBackend(
+        model="gpt-4o",
+        supports_json=False,
+        supports_tools=True,
+        supports_functions=True,
+        client_config=BACKENDS[Backends.OPENAI]
     )
 ]
 

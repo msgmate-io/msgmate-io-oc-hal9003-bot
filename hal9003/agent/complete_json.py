@@ -5,6 +5,13 @@ from agent import models
 def debug_log(message, model=None):
     prefix = f"[{model}] " if model else ">"
     print(f"{prefix} {message}")
+    
+def get_client_for_model(
+    model: str
+):
+    model = models.get_model(model)
+    client = create_client(model.client_config)
+    return client
 
 def create_client(
     backend: models.BackendConfig

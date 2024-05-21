@@ -1,4 +1,5 @@
 from agent import complete_json
+import concurrent.futures
 from agent.paralel_json_complete import json_complete_paralel
 import json
 import yaml

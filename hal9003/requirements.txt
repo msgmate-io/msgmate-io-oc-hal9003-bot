@@ -1,6 +1,7 @@
 autobahn
 open-chat-api-client @ https://github.com/tbscode/open-chat-api-client/tarball/master
 openai
+jsonschema
 redis
 watchdog
 py-mon
@@ -8,6 +9,5 @@ django
 djangorestframework
 aiohttp
 requests
-jsonschema
 tabulate
 pyyaml
