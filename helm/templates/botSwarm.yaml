@@ -27,13 +27,13 @@ spec:
           imagePullSecrets:
             - name: {{ .registry.secretName }}
           {{- end }}
-{{- if .ingress.use }}
 ---
+{{- if .ingress.use }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .name }}-ingress
-  namespace: {{ .Values.namespace }}
+  namespace: {{ $.Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: '3600'
     nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
@@ -46,11 +46,11 @@ spec:
   {{- if .ingress.tls.use }}
   tls:
     - hosts:
-        - {{ .Values.ingress.host }}
+        - {{ .ingress.host }}
       secretName: {{ .name }}-ingress-tls
   {{- end }}
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ .ingress.host }}
       http:
         paths:
           - path: /
@@ -62,6 +62,7 @@ spec:
                   number: 3445
 {{- end }}
 {{- if .redis.use }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -76,12 +77,12 @@ spec:
       targetPort: {{ .redis.port }}
   selector:
     app: {{ .redis.svcName }}
---
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .redis.svcName }}-app
-  namespace: {{ .Values.namespace }}
+  namespace: {{ $.Values.namespace }}
   labels:
     app: {{ .redis.svcName }}-app
 spec:
