@@ -69,14 +69,14 @@ metadata:
   name: {{ .redis.svcName }}
   namespace: {{ $.Values.namespace }}
   labels:
-    app: {{ .redis.svcName }}
+    app: {{ .redis.svcName }}-app
 spec:
   type: ClusterIP
   ports:
     - port: {{ .redis.port }}
       targetPort: {{ .redis.port }}
   selector:
-    app: {{ .redis.svcName }}
+    app: {{ .redis.svcName }}-app
 ---
 apiVersion: apps/v1
 kind: Deployment
