@@ -112,4 +112,5 @@ data:
 {{- range $key, $value := .env }}
   {{ $key }}: {{ $value | b64enc }}
 {{- end }}
+---
 {{- end }}
