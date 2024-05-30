@@ -141,21 +141,22 @@ class Hal9003(WebSocketClientProtocol):
             await self.processCommandMessage(context)
         else:
             # default message processing
+
+            print("New message from", context.senderId, "in chat", context.chat.uuid, ":", context.message.text)
             await self.processMessage(context)
 
     async def onProcessCustomMessage(self, action, payload):
-        print("Processing custom message: '{0}' with payload: {1}".format(action, payload))
+        #print("Processing custom message: '{0}' with payload: {1}".format(action, payload))
         
         if action == 'newMessage':
             message = payload.get('message')
             senderId = payload.get('senderId')
             chat = payload.get('chat')
-            print("New message from", senderId, "in chat", chat, ":", message)
             if 'settings' in chat and chat['settings'] is None:
-                del chat['settings'] # remove None settings
+                del chat['settings']  # remove None settings
             mc = MessageContext(Message.from_dict(message), senderId, ChatResult.from_dict(chat))
             try:
-                await asyncio.create_task(self._newMessage(mc))
+                asyncio.create_task(self._newMessage(mc))
             except Exception as ex:
                 trace = await self.fmt.wrap_code(traceback.format_exc())
                 await self.mng.debugSend(f"## Error \n> {ex}\n - while processing message\n" + trace, mc)
@@ -286,11 +287,11 @@ class Hal9003(WebSocketClientProtocol):
 
 
     def onClose(self, wasClean, code, reason):
-        print("WebSocket connection closed: {0}".format(reason))
+        close_msg = "WebSocket connection closed: {0} code {1}".format(reason, code) + ("NOT CLEAN" if not wasClean else "")
         try:
             asyncio.ensure_future(self.site.stop())
             asyncio.ensure_future(self.app.cleanup())
         except Exception as ex:
             print("Error stopping site", ex)
             
-        raise Exception("Connection closed")
+        raise Exception(close_msg)
