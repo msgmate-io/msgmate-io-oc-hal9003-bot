@@ -51,6 +51,8 @@ def start_bot(
         if isinstance(exception, Exception):
             print(context)
             loop.stop()
+            
+    factory.setProtocolOptions(autoPingInterval=100, autoPingTimeout=100)
 
 
     loop = asyncio.get_event_loop()

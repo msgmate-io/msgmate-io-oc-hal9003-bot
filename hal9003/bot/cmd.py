@@ -77,7 +77,7 @@ class CommandProcessor:
         async def _run_command(args):
             for i in range(args.loop):
                 await self.mng.sendChatMessage(mc, f"Pong! {i+1}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.1)
 
         parser = argparse.ArgumentParser(prog='Ping Command')
         parser.add_argument('--loop', type=int, default=1)
